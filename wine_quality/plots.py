@@ -1,29 +1,24 @@
-from pathlib import Path
-
-from loguru import logger
-from tqdm import tqdm
-import typer
-
-from wine_quality.config import FIGURES_DIR, PROCESSED_DATA_DIR
-
-app = typer.Typer()
+from matplotlib.figure import Figure
+import numpy as np
 
 
-@app.command()
-def main(
-    # ---- REPLACE DEFAULT PATHS AS APPROPRIATE ----
-    input_path: Path = PROCESSED_DATA_DIR / "dataset.csv",
-    output_path: Path = FIGURES_DIR / "plot.png",
-    # -----------------------------------------
-):
-    # ---- REPLACE THIS WITH YOUR OWN CODE ----
-    logger.info("Generating plot from data...")
-    for i in tqdm(range(10), total=10):
-        if i == 5:
-            logger.info("Something happened for iteration 5.")
-    logger.success("Plot generation complete.")
-    # -----------------------------------------
+def graficar_predicciones(y_real, y_pred, ruta_salida):
+    """Guarda un boxplot de la calidad predicha según la calidad real."""
+    y_real = np.asarray(y_real)
+    calidades = np.unique(y_real)
+    grupos = [y_pred[y_real == calidad] for calidad in calidades]
 
+    fig = Figure(figsize=(8, 4.5))
+    ax = fig.subplots()
+    ax.boxplot(grupos, tick_labels=calidades)
+    posiciones = range(1, len(calidades) + 1)
+    ax.plot(posiciones, calidades, "o--", color="#eb6834", label="predicción perfecta")
+    ax.set_title("Calidad predicha según la calidad real (prueba)")
+    ax.set_xlabel("quality real")
+    ax.set_ylabel("quality predicha")
+    ax.spines[["top", "right"]].set_visible(False)
+    ax.legend()
 
-if __name__ == "__main__":
-    app()
+    ruta_salida.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(ruta_salida, bbox_inches="tight")
+    return ruta_salida

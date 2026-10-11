@@ -1,14 +1,7 @@
 from pathlib import Path
 
-from dotenv import load_dotenv
-from loguru import logger
-
-# Load environment variables from .env file if it exists
-load_dotenv()
-
-# Paths
+# Rutas del proyecto
 PROJ_ROOT = Path(__file__).resolve().parents[1]
-logger.info(f"PROJ_ROOT path is: {PROJ_ROOT}")
 
 DATA_DIR = PROJ_ROOT / "data"
 RAW_DATA_DIR = DATA_DIR / "raw"
@@ -21,12 +14,33 @@ MODELS_DIR = PROJ_ROOT / "models"
 REPORTS_DIR = PROJ_ROOT / "reports"
 FIGURES_DIR = REPORTS_DIR / "figures"
 
-# If tqdm is installed, configure loguru with tqdm.write
-# https://github.com/Delgan/loguru/issues/135
-try:
-    from tqdm import tqdm
+# Archivos de datos
+RED_WINE_FILE = RAW_DATA_DIR / "winequality-red.csv"
+WHITE_WINE_FILE = RAW_DATA_DIR / "winequality-white.csv"
+PROCESSED_DATA_FILE = PROCESSED_DATA_DIR / "vinos_limpio.csv"
 
-    logger.remove(0)
-    logger.add(lambda msg: tqdm.write(msg, end=""), colorize=True)
-except ModuleNotFoundError:
-    pass
+# Columnas que usa el modelo
+TARGET = "quality"
+FEATURES = [
+    "fixed acidity",
+    "volatile acidity",
+    "citric acid",
+    "residual sugar",
+    "chlorides",
+    "free sulfur dioxide",
+    "total sulfur dioxide",
+    "density",
+    "pH",
+    "sulphates",
+    "alcohol",
+    "es_tinto",
+]
+
+# Limpieza: límite para quitar el valor extremo de azúcar residual encontrado en el EDA
+MAX_RESIDUAL_SUGAR = 60
+
+# Valores por defecto del experimento
+DEFAULT_TEST_SIZE = 0.2
+DEFAULT_SEED = 42
+DEFAULT_TRACKING_URI = "http://127.0.0.1:8080"
+DEFAULT_EXPERIMENT_NAME = "wine-quality-elasticnet"

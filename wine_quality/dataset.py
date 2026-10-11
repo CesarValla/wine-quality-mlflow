@@ -1,29 +1,36 @@
-from pathlib import Path
+import pandas as pd
 
-from loguru import logger
-from tqdm import tqdm
-import typer
+from wine_quality.config import (
+    MAX_RESIDUAL_SUGAR,
+    PROCESSED_DATA_FILE,
+    RED_WINE_FILE,
+    WHITE_WINE_FILE,
+)
 
-from wine_quality.config import PROCESSED_DATA_DIR, RAW_DATA_DIR
 
-app = typer.Typer()
+def cargar_datos():
+    """Lee los archivos de vinos tintos y blancos y los junta en una sola tabla."""
+    tinto = pd.read_csv(RED_WINE_FILE, sep=";")
+    blanco = pd.read_csv(WHITE_WINE_FILE, sep=";")
+    tinto["tipo_vino"] = "tinto"
+    blanco["tipo_vino"] = "blanco"
+    return pd.concat([tinto, blanco], ignore_index=True)
 
 
-@app.command()
-def main(
-    # ---- REPLACE DEFAULT PATHS AS APPROPRIATE ----
-    input_path: Path = RAW_DATA_DIR / "dataset.csv",
-    output_path: Path = PROCESSED_DATA_DIR / "dataset.csv",
-    # ----------------------------------------------
-):
-    # ---- REPLACE THIS WITH YOUR OWN CODE ----
-    logger.info("Processing dataset...")
-    for i in tqdm(range(10), total=10):
-        if i == 5:
-            logger.info("Something happened for iteration 5.")
-    logger.success("Processing dataset complete.")
-    # -----------------------------------------
+def limpiar_datos(vinos):
+    """Aplica las decisiones de limpieza documentadas en el notebook de exploración."""
+    limpio = vinos.drop_duplicates()
+    limpio = limpio[limpio["residual sugar"] < MAX_RESIDUAL_SUGAR].copy()
+    limpio["es_tinto"] = (limpio["tipo_vino"] == "tinto").astype(int)
+    return limpio.reset_index(drop=True)
+
+
+def main():
+    vinos = limpiar_datos(cargar_datos())
+    PROCESSED_DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
+    vinos.to_csv(PROCESSED_DATA_FILE, index=False)
+    print(f"Datos limpios guardados en {PROCESSED_DATA_FILE} ({len(vinos)} registros)")
 
 
 if __name__ == "__main__":
-    app()
+    main()

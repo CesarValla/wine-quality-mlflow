@@ -197,3 +197,7 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Archivos que genera el script en cada corrida
+reports/metricas.json
+reports/figures/*.png
