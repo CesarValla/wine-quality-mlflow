@@ -1,5 +1,13 @@
-# Data
-/data/
+# Solo se suben los datos originales (data/raw)
+/data/interim/
+/data/processed/
+/data/external/
+
+# MLflow
+mlruns/
+mlartifacts/
+mlflow.db
+
 
 # Mac OS-specific storage files
 .DS_Store
